@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
-using HotelManagerApp.Models;
 using HotelManagerApp.Services;
+using HotelManagerApp.Data;
 
 namespace HotelManagerApp
-{ 
+{
     internal static class Program
     {
         [STAThread]
@@ -13,22 +13,31 @@ namespace HotelManagerApp
         {
             ApplicationConfiguration.Initialize();
 
-            HotelManager manager = new HotelManager();
-            List<Room> freeRooms = manager.GetAvailableRooms("Standard", 2);
+            DataManager dataManager = new DataManager();
+            HotelManager originalManager = new HotelManager();
 
-            string testMessage = "Тест пройшов успішно.\n" +
-                                 "Знайдено вільних номерів: " + freeRooms.Count + "\n";
+            string filePath = "data.json";
 
-            if (freeRooms.Count > 0)
+            dataManager.SaveData(originalManager, filePath);
+
+         
+            if (File.Exists(filePath))
             {
-                testMessage += "ID першого номера: " + freeRooms[0].ID;
+               
+                HotelManager loadedManager = dataManager.LoadData(filePath);
+
+                string testMessage = "Тест Комміту 4 пройшов успішно!\n\n" +
+                                     "Файл data.json створено та успішно прочитано.\n\n" +
+                                     "Збережено кімнат: " + originalManager.Rooms.Count + "\n" +
+                                     "Завантажено кімнат: " + loadedManager.Rooms.Count + "\n\n" +
+                                     "Шлях до файлу:\n" + Path.GetFullPath(filePath);
+
+                MessageBox.Show(testMessage, "Результат збереження");
             }
             else
             {
-                testMessage += "На жаль, вільних номерів не знайдено.";
+                MessageBox.Show("Помилка: файл data.json не знайдено!", "Помилка");
             }
-
-            MessageBox.Show(testMessage, "Результат");
         }
     }
 }
